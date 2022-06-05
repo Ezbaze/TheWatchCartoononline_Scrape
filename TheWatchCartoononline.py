@@ -1,28 +1,32 @@
+#! /usr/bin/env C:\\Users\\rybit\\anaconda3\\python.exe
+
 import requests
 from bs4 import BeautifulSoup
 import os
 
-url = 'https://www.thewatchcartoononline.tv/dubbed-anime-list'
+base_url = "https://www.wcofun.com/"
+anime_list_url = f'{base_url}dubbed-anime-list'
 
 headers = {
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.72 Safari/537.36'
 }
 
-r = requests.get(url, timeout=(3.05, 20))
-soup = BeautifulSoup(r.content, 'html.parser')
+r = requests.get(anime_list_url, timeout=(3.05, 20)).text
+soup = BeautifulSoup(r, 'html.parser')
 
-all_href = soup.find_all('a', href=True)
-print('Finding all URLs')
+print(soup)
+
+anime_list_container = soup.find('div', {'class': 'ddmcc'})
+print(anime_list_container)
+all_href = anime_list_container.find_all('a', href=True)
 
 href_list = []
-print('href_list READY')
+print(f"HREF LIST {len(href_list)}")
 
 for a in all_href:
-    if 'https://www.thewatchcartoononline.tv/anime/' in a['href']:
+    if f'{base_url}anime/' in a['href']:
         href_list.append(a['href'])
-print('Urls to go through: '+ str(len(href_list)))
-
-# test_link = 'https://www.thewatchcartoononline.tv/anime/highschool-of-the-dead'
+print('Urls to go through: ' + str(len(href_list)))
 
 try:
     os.mkdir(os.path.join(os.getcwd(), 'images'))
@@ -40,7 +44,8 @@ for a in href_list:
 
     for image in images:
         if 'cdn' in image['src']:
-            print('----DOING IMAGE ' + str(href_list.index(a)) + '/' + str(total_to_do) + ' left to do ' + str(total_to_do - href_list.index(a)) + ' ----')
+            print('----DOING IMAGE ' + str(href_list.index(a)) + '/' + str(total_to_do) +
+                  ' left to do ' + str(total_to_do - href_list.index(a)) + ' ----')
             link = 'https:' + image['src']
             print('Got image Link: ' + link)
             name = a.replace('https://www.thewatchcartoononline.tv/anime/', '')
